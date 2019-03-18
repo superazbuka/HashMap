@@ -21,7 +21,7 @@ private:
 	List values;
 	std::vector<std::vector<iterator>> table;
 	Hash hash;
-	size_t _size;
+	size_t current_size;
 
 	size_t get_pos(const KeyType &key) const
 	{
@@ -59,11 +59,11 @@ private:
 	{
 		values.push_front(p);
 		table[get_pos(p.first)].push_back(values.begin());
-		_size++;
-		if (_size >= table.size() * MAX_LOAD_FACTOR)
+		current_size++;
+		if (current_size >= table.size() * MAX_LOAD_FACTOR)
 		{
 			table.clear();
-			table.resize(_size * START_OBR_LOAD_FACTOR);
+			table.resize(current_size * START_OBR_LOAD_FACTOR);
 			rebuild();
 		}
 	}
@@ -76,8 +76,8 @@ public:
 			this->clear();
 			values = List(other.values.begin(), other.values.end());
 			hash = other.hash;
-			_size = other._size;
-			table.resize(std::max(table.size(), _size * START_OBR_LOAD_FACTOR + 1ul));
+			current_size = other.current_size;
+			table.resize(std::max(table.size(), current_size * START_OBR_LOAD_FACTOR + 1ul));
 			rebuild();
 		}
 		return (*this);
@@ -96,7 +96,7 @@ public:
 		: values(other.values)
 		, table(other.size() * START_OBR_LOAD_FACTOR + 1ul)
 		, hash(other.hash)
-		, _size(other.size())
+		, current_size(other.size())
 	{
 		rebuild();
 	}
@@ -105,7 +105,7 @@ public:
 		: values()
 		, table(1ul)
 		, hash(_hash)
-		, _size(0)
+		, current_size(0)
 	{}
 
 	template<typename Iter>
@@ -113,7 +113,7 @@ public:
 		: values()
 		, table(1ul)
 		, hash(_hash)
-		, _size(0)
+		, current_size(0)
 	{
 		for (; first != last; first++)
 		{
@@ -147,12 +147,12 @@ public:
 	
 	size_t size() const
 	{
-		return _size;
+		return current_size;
 	}
 
 	bool empty() const
 	{
-		return _size == 0;
+		return current_size == 0;
 	}
 
 	Hash hash_function() const
@@ -185,7 +185,7 @@ public:
 		auto pos = find_in_table(key);
 		if (pos.first == (size_t)-1)
 			return;
-		_size--;
+		current_size--;
 		values.erase(*pos.second);
 		table[pos.first].erase(pos.second);
 	}
@@ -216,6 +216,6 @@ public:
 			table[get_pos(i.first)].clear();
 		}
 		values.clear();
-		_size = 0;
+		current_size = 0;
 	}
 };
