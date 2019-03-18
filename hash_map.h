@@ -23,39 +23,39 @@ private:
 	Hash hash;
 	size_t _size;
 
-	size_t get_pos(const KeyType &key) const/*{{{*/
+	size_t get_pos(const KeyType &key) const
 	{
 		size_t x = hash(key);
 		return x % table.size();
-	}/*}}}*/
+	}
 
-	void rebuild()/*{{{*/
+	void rebuild()
 	{
 		for (auto fst = values.begin(); fst != values.end(); ++fst)
 		{
 			table[get_pos(fst->first)].push_back(fst);
 		}
-	}/*}}}*/
+	}
 
-	std::pair<size_t, sub_iterator> find_in_table(const KeyType &key)/*{{{*/
+	std::pair<size_t, sub_iterator> find_in_table(const KeyType &key)
 	{
 		size_t row = get_pos(key);
 		for (sub_iterator j = table[row].begin(); j != table[row].end(); ++j)
 			if ((*j)->first == key)
 				return {row, j};
 		return {-1, table[0].end()};
-	}/*}}}*/
+	}
 
-	std::pair<size_t, const_sub_iterator> find_in_table(const KeyType &key) const/*{{{*/
+	std::pair<size_t, const_sub_iterator> find_in_table(const KeyType &key) const
 	{
 		size_t row = get_pos(key);
 		for (const_sub_iterator j = table[row].begin(); j != table[row].end(); ++j)
 			if ((*j)->first == key)
 				return {row, j};
 		return {-1, table[0].end()};
-	}/*}}}*/
+	}
 
-	void unsafe_insert(const Pair &p)/*{{{*/
+	void unsafe_insert(const Pair &p)
 	{
 		values.push_front(p);
 		table[get_pos(p.first)].push_back(values.begin());
@@ -66,10 +66,10 @@ private:
 			table.resize(_size * START_OBR_LOAD_FACTOR);
 			rebuild();
 		}
-	}/*}}}*/
+	}
 public:
 
-	HashMap &operator =(const HashMap &other)/*{{{*/
+	HashMap &operator =(const HashMap &other)
 	{
 		if (&other != this)
 		{
@@ -77,38 +77,38 @@ public:
 			values = List(other.values.begin(), other.values.end());
 			hash = other.hash;
 			_size = other._size;
-			table.resize(std::max(table.size(), _size * START_OBR_LOAD_FACTOR + 1));
+			table.resize(std::max(table.size(), _size * START_OBR_LOAD_FACTOR + 1ul));
 			rebuild();
 		}
 		return (*this);
-	}/*}}}*/
+	}
 
-	void insert(const Pair &p)/*{{{*/
+	void insert(const Pair &p)
 	{
 		auto x = find_in_table(p.first);
 		if (x.first == (size_t)-1)
 		{
 			unsafe_insert(p);
 		}
-	}/*}}}*/
+	}
 
-	HashMap(const HashMap &other)/*{{{*/
+	HashMap(const HashMap &other)
 		: values(other.values)
-		, table(other.size() * START_OBR_LOAD_FACTOR + 1)
+		, table(other.size() * START_OBR_LOAD_FACTOR + 1ul)
 		, hash(other.hash)
 		, _size(other.size())
 	{
 		rebuild();
-	}/*}}}*/
+	}
 
-	HashMap(Hash _hash = Hash())/*{{{*/
+	HashMap(Hash _hash = Hash())
 		: values()
-		, table(1)
+		, table(1ul)
 		, hash(_hash)
 		, _size(0)
-	{}/*}}}*/
+	{}
 
-	template<typename Iter>/*{{{*/
+	template<typename Iter>
 	HashMap(Iter first, Iter last, Hash _hash = Hash())
 		: values()
 		, table(1ul)
@@ -119,48 +119,48 @@ public:
 		{
 			insert(*first);
 		}
-	}/*}}}*/
+	}
 
-	HashMap(const std::initializer_list<Pair> &ini_list, Hash _hash = Hash())/*{{{*/
+	HashMap(const std::initializer_list<Pair> &ini_list, Hash _hash = Hash())
 		: HashMap(ini_list.begin(), ini_list.end(), _hash)
-	{}/*}}}*/
+	{}
 
-	iterator begin()/*{{{*/
+	iterator begin()
 	{
 		return values.begin();
-	}/*}}}*/
+	}
 
-	iterator end()/*{{{*/
+	iterator end()
 	{
 		return values.end();
-	}/*}}}*/
+	}
 
-	const_iterator begin() const/*{{{*/
+	const_iterator begin() const
 	{
 		return values.cbegin();
-	}/*}}}*/
+	}
 
-	const_iterator end() const/*{{{*/
+	const_iterator end() const
 	{
 		return values.cend();
-	}/*}}}*/
+	}
 	
-	size_t size() const/*{{{*/
+	size_t size() const
 	{
 		return _size;
-	}/*}}}*/
+	}
 
-	bool empty() const/*{{{*/
+	bool empty() const
 	{
 		return _size == 0;
-	}/*}}}*/
+	}
 
-	Hash hash_function() const/*{{{*/
+	Hash hash_function() const
 	{
 		return hash;
-	}/*}}}*/
+	}
 
-	iterator find(const KeyType &key)/*{{{*/
+	iterator find(const KeyType &key)
 	{
 		auto pos = find_in_table(key);
 		if (pos.first == (size_t)-1)
@@ -168,9 +168,9 @@ public:
 			return values.end();
 		}
 		return *pos.second;
-	}/*}}}*/
+	}
 
-	const_iterator find(const KeyType &key) const/*{{{*/
+	const_iterator find(const KeyType &key) const
 	{
 		auto pos = find_in_table(key);
 		if (pos.first == (size_t)-1)
@@ -178,9 +178,9 @@ public:
 			return values.end();
 		}
 		return *pos.second;
-	}/*}}}*/
+	}
 
-	void erase(const KeyType &key)/*{{{*/
+	void erase(const KeyType &key)
 	{
 		auto pos = find_in_table(key);
 		if (pos.first == (size_t)-1)
@@ -188,9 +188,9 @@ public:
 		_size--;
 		values.erase(*pos.second);
 		table[pos.first].erase(pos.second);
-	}/*}}}*/
+	}
 
-	ValueType &operator [](const KeyType &key)/*{{{*/
+	ValueType &operator [](const KeyType &key)
 	{
 		auto pos = find_in_table(key);
 		if (pos.first == (size_t)-1)
@@ -199,17 +199,17 @@ public:
 			return values.begin()->second;
 		}
 		return (*pos.second)->second;
-	}/*}}}*/
+	}
 
-	const ValueType &at(const KeyType &key) const/*{{{*/
+	const ValueType &at(const KeyType &key) const
 	{
 		auto pos = find_in_table(key);
 		if (pos.first == (size_t)-1)
 			throw OUT_OF_RANGE;
 		return (*pos.second)->second;
-	}/*}}}*/
+	}
 
-	void clear()/*{{{*/
+	void clear()
 	{
 		for (auto &i: values)
 		{
@@ -217,5 +217,5 @@ public:
 		}
 		values.clear();
 		_size = 0;
-	}/*}}}*/
+	}
 };
